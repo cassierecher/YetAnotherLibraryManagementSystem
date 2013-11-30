@@ -1,0 +1,31 @@
+<html>
+	<head>
+		<link rel="stylesheet" type="text/css" href="../../css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="../../css/bootstrap-theme.min.css" />
+		<link rel="stylesheet" type="text/css" href="../../css/yalms.css" />
+		<script>
+		    function getFile(){ document.getElementById("file").click();}
+			function alertFilename() {
+                var filename = document.getElementById('file');
+				filename = filename.value;
+				var out;
+				if (filename == "") {
+					out = "No File Selected";
+				} else {
+					filename = filename.split(/(\\|\/)/g).pop()
+					out = filename;
+				}
+				document.getElementById("filename").innerHTML = out;
+			}
+		</script>
+	</head>
+	<body>
+
+		<form action="admin_uploadbookpdf.php" method="post" enctype="multipart/form-data">
+			<div class="btn btn-primary" style="float: left;" onclick="getFile()">Click to upload!</div>			<div id="filename" style="float: left; position:relative; top:7px; left: 5px;">No File Selected</div>
+			<div style='height: 0px;width:0px; overflow:hidden;'><input type="file" name="pdf" id="file" onchange="alertFilename()"></div><br />
+			<br />ID: <input type="text" style="float:none;" name="id">
+			<input type="submit" class="btn btn-success" style="float:none;" name="submit" value="Submit">
+		</form>
+	</body>
+</html>

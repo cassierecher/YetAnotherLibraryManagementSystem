@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<head>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css" />
+    <link rel="stylesheet" type="text/css" href="css/yalms.css" />
+
+	<script src="js/jquery-2.0.3.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/knockout-3.0.0.js"></script>
+	<script src="js/pdfobject.js"></script>
+    <script src="js/yalms.js"></script>
+
+    <title>yaLMS</title>
+    <meta charset="utf-8">
+</head>
+<body>
+<h1>yet another Library Management System</h1>
+
+<div class="alert alert-success alert-dismissable" id="generalAlert">
+    <button type="button" class="close" id="generalAlertClose"><span class="glyphicon glyphicon-ban-circle"></span></button>
+    <span id="generalAlertText">default text</span>
+</div>
+
+<ul class="nav nav-tabs">
+	<li class="active"><a href="#booklistview" data-toggle="tab" id="bookListViewTab">Books</a></li>
+	<li><a href="#userlistview" data-toggle="tab" data-bind="visible: loggedInAdmin" id="userListViewTab">Users</a></li>
+    <button type="button" class="btn btn-default btn-navbar" id="loginButton" data-bind="visible: userIsNotLoggedIn">Log In</button>
+    <button type="button" class="btn btn-default btn-navbar" id="logoutButton" data-bind="visible: userIsLoggedIn">Log Out</button>
+    <div class="btn-group">
+        <button type="button" class="btn btn-info dropdown-toggle" data-toggle="dropdown" data-bind="visible: loggedInAdmin">Admin Menu <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+            <li><a href="#" id="addBookDropItem">Add A Book...</a></li>
+            <li><a href="#" id="addCustomerDropItem">Add A Customer...</a></li>
+        </ul>
+    </div>
+</ul>
+	
+	<div class="tab-content leftsection">
+		<div class="tab-pane fade active in listView" id="booklistview">
+			<table class="table table-bordered table-hover">
+				<thead>
+                    <th data-bind="visible: loggedInAdmin">Edit/Del</th>
+                    <th data-bind="visible: loggedInUser">Check Out</th>
+					<th>Book Title <a id="bookSort-title" class="glyphicon glyphicon-chevron-down bookSorter"></a></th>
+					<th>Author <a id="bookSort-author" class="glyphicon glyphicon-chevron-down bookSorter"></a></th>
+					<th>Publisher <a id="bookSort-publisher" class="glyphicon glyphicon-chevron-down bookSorter"></a></th>
+					<th>Publish Date <a id="bookSort-issue" class="glyphicon glyphicon-chevron-down bookSorter"></a></th>
+					<th>Return Date <a id="bookSort-return" class="glyphicon glyphicon-chevron-down bookSorter"></a></th>
+					<th>Customer ID <a id="bookSort-cid" class="glyphicon glyphicon-chevron-down bookSorter"></a></th>
+				</thead>
+                <tbody data-bind="foreach: bookListViewArray">
+                    <tr>
+                        <td data-bind="visible: loggedInAdmin">
+                            <a href="#" class="bookEditButton glyphicon glyphicon-pencil" data-bind="attr: {id: editListOrder}"></a>
+                            <a href="#" class="bookDeleteButton glyphicon glyphicon-remove" data-bind="attr: {id: deleteListOrder}"></a>
+                        </td>
+                        <td data-bind="visible: loggedInUser">
+                            <a href="#" class="bookCheckOutButton glyphicon glyphicon-ok" data-bind="attr: {id: checkOutListOrder}"></a>
+                        </td>
+                        <td><a href="#" class="viewDetails" data-bind="text: Title, attr: {id: viewListOrder}"></a></td>
+                        <td><span data-bind="text: Author"></span></td>
+                        <td><span data-bind="text: Publisher"></span></td>
+                        <td><span data-bind="text: Issue_Date"></span></td>
+                        <td><span data-bind="text: Return_Date"></span></td>
+                        <td><span data-bind="text: CID"></span></td>
+                    </tr>
+                </tbody>
+			</table>
+		</div>
+			
+		<div class="tab-pane fade in listView" id="userlistview">
+			<table class="table table-bordered table-hover">
+				<thead>
+                    <th>Edit/Del</th>
+					<th>First Name<a href="#" id="userSort-first" class="glyphicon glyphicon-chevron-down userSorter"></a></th>
+					<th>Last Name<a href="#" id="userSort-last" class="glyphicon glyphicon-chevron-down userSorter"></a></th>
+					<th>Account Creation Date</th>
+					<th>Customer ID<a href="#" id="userSort-id" class="glyphicon glyphicon-chevron-down userSorter"></a></th>
+					<th>Books Checked Out<th>
+				</thead>
+                <tbody data-bind="foreach: customerListViewArray">
+                <tr>
+                    <td data-bind="visible: loggedInAdmin">
+                        <a href="#" class="custEditButton glyphicon glyphicon-pencil" data-bind="attr: {id: editCustListOrder}"></a>
+                        <a href="#" class="custDeleteButton glyphicon glyphicon-remove" data-bind="attr: {id: deleteCustListOrder}"></a>
+                    </td>
+                    <td><a href="#" class="custViewLink" data-bind="text: First_Name, attr: {id: viewCustListOrder}"></a></td>
+                    <td data-bind="text: Last_Name"></td>
+                    <td data-bind="text: Creation_Date"></td>
+                    <td data-bind="text: UID"></td>
+                    <td data-bind="text: Book_List.length"></td>
+                </tr>
+                </tbody>
+			</table>
+		</div>
+	</div>
+
+<div class="rightsection">
+	<form role="form">
+		<h4>Search:</h4>
+
+		<div class="form-group" data-bind="visible: bookTabActive">
+			<input type="search" placeholder="Search" class="form-control" id="searchText">
+            <br />
+			<button type="button" class="btn btn-primary" id="titleSearch">by Title</button>
+			<button type="button" class="btn btn-primary" id="authorSearch">by Author</button>
+            <button type="button" class="btn btn-warning" id="clearSearch">Clear</button>
+		</div>
+
+		<div class="form-group" data-bind="visible: userTabActive">
+			<input type="search" placeholder="Search" class="form-control" id="userSearchText">
+            <br />
+			<button type="button" class="btn btn-primary" id="userIdSearch">by ID</button>
+            <button type="button" class="btn btn-warning" id="clearUserSearch">Clear</button>
+		</div>
+
+
+	</form>
+</div>
+
+<!-- modals -->
+<div class="modal fade" id="loginModal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				Login to yaLMS
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+			<div class="modal-body">
+				<form>
+                    <div class="form-group">
+                        <label for="loginUsername">Username</label>
+                        <input type=text" class="form-control" id="loginUsername" placeholder="Username">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" class="form-control" id="loginPassword" placeholder="Password">
+                    </div>
+                </form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-success" id="performLoginButton">Log In</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+
+
+<div class="modal fade" id="newBookModal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				Add a New Book
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+			<div class="modal-body">
+				<form enctype="multipart/form-data" id="newBookForm">
+                    <div class="form-group">
+                        <label for="newBookTitle">Title</label>
+                        <input type=text" class="form-control" id="newBookTitle" placeholder="Title">
+                        <label for="newBookAuthor">Author</label>
+                        <input type="text" class="form-control" id="newBookAuthor" placeholder="Author">
+                        <label for="newBookPublisher">Publisher</label>
+                        <input type="text" class="form-control" id="newBookPublisher" placeholder="Publisher">
+                        <label for="newBookIssueDate">Publish Date</label>
+                        <input type="text" class="form-control" id="newBookIssueDate" placeholder="Format like yyyy-mm-dd">
+                        <label for="newImageUploader">Upload Book Cover</label>
+                        <p>Accepted image formats: .gif .png .jpg</p>
+                        <input type="file" id="newImageUploader">
+                        <label for="newPdfUploader">Upload Book PDF</label>
+                        <input type="file" id="newPdfUploader">
+                    </div>
+                </form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-success" id="performBookAddButton">Create</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="modal fade" id="editBookModal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				Edit a Book
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+			<div class="modal-body">
+				<form>
+                    <div class="form-group">
+                        <label for="editBookTitle">Title</label>
+                        <input type=text" class="form-control" id="editBookTitle" placeholder="Title">
+                        <label for="editBookAuthor">Author</label>
+                        <input type="text" class="form-control" id="editBookAuthor" placeholder="Author">
+                        <label for="editBookPublisher">Publisher</label>
+                        <input type="text" class="form-control" id="editBookPublisher" placeholder="Publisher">
+                        <label for="editBookIssueDate">Publish Date</label>
+                        <input type="text" class="form-control" id="editBookIssueDate" placeholder="Format like yyyy-mm-dd">
+                        <label for="editImageUploader">Upload Book Cover</label>
+                        <p>Accepted image formats: .gif .png .jpg</p>
+                        <input type="file" id="editImageUploader"> 
+                        <label for="editPdfUploader">Upload Book PDF</label>
+                        <input type="file" id="editPdfUploader"> 
+                    </div>
+                </form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-success" id="performBookEditButton">Edit</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+<div class="modal fade" id="newCustomerModal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				Add a New Customer
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+			<div class="modal-body">
+				<form>
+                    <div class="form-group">
+                        <label for="newCustomerFirstName">First Name</label>
+                        <input type=text" class="form-control" id="newCustomerFirstName" placeholder="First Name">
+                        <label for="newCustomerLastName">Last Name</label>
+                        <input type="text" class="form-control" id="newCustomerLastName" placeholder="Last Name">
+                        <label for="newCustomerPassword">Password</label>
+                        <input type="text" class="form-control" id="newCustomerPassword" placeholder="Password">
+                    </div>
+                </form>
+                <p>The customer's username will be the first and last name together, with no space.</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-success" id="performCustomerAddButton">Create</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="editCustomerModal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				Edit a Customer
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+			<div class="modal-body">
+				<form>
+                    <div class="form-group">
+                        <label for="editCustomerFirstName">First Name</label>
+                        <input type=text" class="form-control" id="editCustomerFirstName" placeholder="First Name">
+                        <label for="editCustomerLastName">Last Name</label>
+                        <input type="text" class="form-control" id="editCustomerLastName" placeholder="Last Name">
+                    </div>
+                </form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-success" id="performCustomerEditButton">Edit</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div class="modal fade" id="bookDetailsModal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+                <span id="bookDetailsHeader"></span>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+			<div class="modal-body">
+				<div style="float:left; width:250px;">
+                <p><b>Author:</b> <span id="bookDetailsAuthor"></span></p>
+                <p><b>Publisher:</b> <span id="bookDetailsPublisher"></span></p>
+                <p><b>Publish Date:</b> <span id="bookDetailsIssueDate"></span></p>
+                <p><b><!-- and j -->Location:</b> <span id="bookDetailsLocation"></span></p></div>
+				<div style="float:right;"><img id="bookDetailsCover" style="width: 210px;" src="uploads/bookcovers/comic_sansLOLOLOLOL.png" /></div>
+				<div id="bookDetailsPDF" style="clear:both;">It appears you don't have Adobe Reader or PDF support in this web browser.</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="customerDetailsModal">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+                <span id="customerDetailsHeader"></span>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+			<div class="modal-body">
+                <p>Account Creation Date: <span id="customerDetailsAccountCreationDate"></span></p>
+                <p>Customer ID#: <span id="customerDetailsID"></span></p>
+                <p>Books Checked Out: <span data-bind="html: checkoutList"></span></p>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+
+<footer style="clear:both;">
+	<br />
+	<br />
+	<br />
+	<br />
+	<br />
+	<br />
+    <br />
+    <br />
+    <br />
+	<a href="getbootstrap.com">Built with Bootstrap</a>, &copy; Twitter, code licensed under <a href="LICENSE">Apache License v2.0</a>
+	<br />
+	<a href="knockoutjs.com">Built with Knockout.js</a>, &copy; knockoutjs.com, code licensed under <a href="MIT-LICENSE_knockout.txt">MIT License</a>
+    <br />
+    <a href="jquery.com">Built with jQuery</a>, &copy; 2013 jQuery Foundation, code licensed under <a href="MIT-LICENSE_jquery.txt">MIT License</a>
+</footer>
+</body>
+</html>
