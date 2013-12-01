@@ -6,10 +6,10 @@ Library Management System for CSE360
 This is a library management system created for Dr. Wei-Tek Tsai's ASU course "Intro to Software Engineering".
 
 Contributors:
-Chris Recher        @chrisrecher
-Tyler Wanek         @implausible
-Josiah Rentschler   @jrentsch
-Greg Frantzen       @gfrantze
+- @chrisrecher
+- @implausible
+- @jrentsch
+- @gfrantze
 
 
 http://getbootstrap.com Built with Bootstrap © Twitter, code licensed under Apache License v2.0 (see LICENSE)
